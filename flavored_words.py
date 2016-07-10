@@ -6,9 +6,11 @@
 from divide_word import *
 from combine_word import *
 from random import randint
-
+from collections import defaultdict
 
 if __name__ == '__main__':
+    # word list to 'inspire' new words
+    # TODO: not the best list for this; some pieces have no overlaps
     lexicon = ["apple", "orange", "banana", "kiwifruit", "grape", "grapefruit", "melon", "watermelon", "strawberry",
                "blueberry", "peach", "pear", "plum", "persimmon", "carrot", "onion", "tomato", "avocado", "leek",
                "cilantro", "spinach", "lettuce", "kale", "cabbage", "corn", "wheat", "oat", "barley", "malt", "ginger",
@@ -20,43 +22,29 @@ if __name__ == '__main__':
                "nectarine", "papaya", "parsley", "parsnip", "peanut", "pecan", "pineapple", "pomegranate", "radish",
                "rhubarb", "rutabaga", "saffron", "soybean", "basil", "truffle", "watercress", "yam", "juniper",
                "coconut", "cherry", "asparagus", "arugula", "mint"]
+    # makes words like:
+    #mabbacalelonion
+    #baffroy
+    #palt
+    #lycheet
+    #maspamboom
 
-    processed_words = {w: divide_word(w) for w in lexicon}
-
-    # TODO: dict of pieces grouped by starting vowel
+    bits_by_vowel = defaultdict(list)
+    for w in lexicon:
+        word_pieces = divide_word(w)
+        for wp in word_pieces:
+            bits_by_vowel[wp[0]].append(wp)
 
     num_new_words = 10
 
     for i in range(num_new_words):
-        s = randint(0, len(lexicon) - 1)
-        start = processed_words[lexicon[s]]
-        new_word = start[0]
-        current_piece = start[0]  # first piece in word
-        n1 = randint(0, len(lexicon) - 1)
-        n2 = (n1 - 1) % len(lexicon)
-        while n1 != n2:
-            next_word = processed_words[lexicon[n1]]
-            i = 0
-            while i < len(next_word) and not can_combine(current_piece, next_word[i]):
-                i += 1
-            if i < len(next_word):
-                current_piece = next_word[i]
-                new_word = add_sound_parts(new_word, current_piece)
-                if current_piece[-1] != '':
-                    n1 = randint(0, len(lexicon) - 1)
-                    n2 = (n1 - 1) % len(lexicon)
-                else:
-                    break
-            else:
-                n1 = (n1 + 1) % len(lexicon)
-
+        s = randint(0, len(bits_by_vowel['']) - 1)
+        current = bits_by_vowel[''][s]
+        new_word = current
+        ending = current[-1]
+        while ending != '' and ending in bits_by_vowel:
+            n = randint(0, len(bits_by_vowel[ending])-1)
+            current = bits_by_vowel[ending][n]
+            new_word = add_sound_parts(new_word, current)
+            ending = current[-1]
         print(''.join(new_word))
-
-
-#examples:
-#neggplamorarleydennefruit
-#plucentiper
-#porabbappleler
-#bacon
-#jilard
-#lerrycheet
