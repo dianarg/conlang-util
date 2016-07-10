@@ -1,4 +1,5 @@
-vowels = 'aeiouyAEIOUY'
+# results look better if we don't consider Y a vowel
+vowels = 'aeiouAEIOU'
 
 
 def divide_word(word):
@@ -17,10 +18,9 @@ def divide_word(word):
                 start = bit[2]
                 bit = [start, '', '']
                 bit[1] += word[letter]
-                b = 1
             else:
-                b = 1
-                bit[b] += word[letter]
+                bit[1] += word[letter]
+            b = 1
         letter += 1
     pieces.append(tuple(bit))
     return pieces
@@ -30,9 +30,9 @@ def divide_word(word):
 def check_divide_word(word, expected):
     pieces = divide_word(word)
     if pieces == expected:
-        print 'PASS'
+        print('PASS')
     else:
-        print 'FAIL', word, expected, pieces
+        print('FAIL', word, expected, pieces)
 
 
 def test_divide_word():
