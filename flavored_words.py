@@ -3,8 +3,8 @@
 # can also use this method for names!
 
 
-from divide_word import *
-from combine_word import *
+from divide_word import divide_word
+from combine_word import add_sound_parts
 from random import randint
 from collections import defaultdict
 
@@ -23,11 +23,11 @@ if __name__ == '__main__':
                "rhubarb", "rutabaga", "saffron", "soybean", "basil", "truffle", "watercress", "yam", "juniper",
                "coconut", "cherry", "asparagus", "arugula", "mint"]
     # makes words like:
-    #mabbacalelonion
-    #baffroy
-    #palt
-    #lycheet
-    #maspamboom
+    # mabbacalelonion
+    # baffroy
+    # palt
+    # lycheet
+    # maspamboom
 
     bits_by_vowel = defaultdict(list)
     for w in lexicon:
