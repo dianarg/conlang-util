@@ -1,4 +1,4 @@
-from combine_word import can_combine, add_sound_parts
+from flavored_words import can_combine, add_sound_parts
 
 
 def check_can_combine(first, second):

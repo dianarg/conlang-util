@@ -1,4 +1,4 @@
-from divide_word import divide_word
+from flavored_words import divide_word
 
 
 def check_divide_word(word, expected):
