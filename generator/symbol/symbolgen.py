@@ -2,6 +2,7 @@
 
 import sys
 import random
+import colorsys
 # import and init pygame
 import pygame
 pygame.init()
@@ -31,17 +32,6 @@ Code 0,2,6 would make a shape like a 7.
 
 '''
 
-# constants
-white = (255, 255, 255)
-black = (0, 0, 0)
-red = (255, 0, 0)
-orange = (255, 106, 0)
-yellow = (255, 255, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-
-line_color = white
-
 
 def point_list_to_segments(plist):
     lines = []
@@ -54,9 +44,22 @@ def point_list_to_segments(plist):
     return lines
 
 
+def color_list(num_seg):
+    saturation = 1.0
+    value = 1.0
+    spacing = 1.0 / num_seg
+    colors = []
+    for i in range(num_seg):
+        hue = i * spacing
+        rgb = colorsys.hsv_to_rgb(hue, saturation, value)
+        rgb = (rgb[0]*255, rgb[1]*255, rgb[2]*255)
+        colors.append(rgb)
+    return colors
+
+
 def rainbow_block_draw(window, plist, x, y, scale):
     segments = point_list_to_segments(plist)
-    colors = [red, orange, yellow, green, blue]*10  # TODO: interpolate to make enough colors for all the segments
+    colors = color_list(len(segments))
     for ix, seg in enumerate(segments):
         startp, endp = seg
         a = (x+(startp % n)*scale, y+(startp/n)*scale)
@@ -72,6 +75,7 @@ def block_draw(window, plist, x, y, scale):
         drawlist.append((x+(point % n)*scale, y+(point/n)*scale))
 
     # add lines to be drawn when flip() is called
+    line_color = (255, 255, 255)  # white
     pygame.draw.lines(window, line_color, False, drawlist, 2)
 
 
@@ -147,7 +151,7 @@ def symbol_window(num_symbol, n, scale):
     # create the screen
     screen_size = scale + (n)*scale*num_symbol
     window = pygame.display.set_mode((screen_size, screen_size))
-    bg_color = black
+    bg_color = (0, 0, 0)  # black
     pygame.display.get_surface().fill(bg_color)
 
     populate(window, screen_size, n, scale)
