@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import random
 # import and init pygame
@@ -32,14 +34,37 @@ Code 0,2,6 would make a shape like a 7.
 # constants
 white = (255, 255, 255)
 black = (0, 0, 0)
+red = (255, 0, 0)
+orange = (255, 106, 0)
+yellow = (255, 255, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
 
-bg_color = black
 line_color = white
-n = 3  # size of symbols
-scale = 10  # distance between nodes within symbol and between symbols
 
 
-def block_draw(plist, x, y):
+def point_list_to_segments(plist):
+    lines = []
+    first = plist.pop()
+    while len(plist) > 0:
+        next = plist.pop()
+        lines.append((next, first))
+        first = next
+    lines.reverse()
+    return lines
+
+
+def rainbow_block_draw(window, plist, x, y, scale):
+    segments = point_list_to_segments(plist)
+    colors = [red, orange, yellow, green, blue]*10  # TODO: interpolate to make enough colors for all the segments
+    for ix, seg in enumerate(segments):
+        startp, endp = seg
+        a = (x+(startp % n)*scale, y+(startp/n)*scale)
+        b = (x+(endp % n)*scale, y+(endp/n)*scale)
+        pygame.draw.lines(window, colors[ix], False, [a, b], 2)
+
+
+def block_draw(window, plist, x, y, scale):
     ''' Draw a symbol by connecting the list of nodes in order.'''
     drawlist = []
     while len(plist) > 0:
@@ -50,7 +75,7 @@ def block_draw(plist, x, y):
     pygame.draw.lines(window, line_color, False, drawlist, 2)
 
 
-def calculate_neighbors(i, j):
+def calculate_neighbors(n, i, j):
     k = i*n + j  # node number
     neighbors = []
     for u in [-1, 0, 1]:
@@ -63,13 +88,12 @@ def calculate_neighbors(i, j):
     return neighbors
 
 
-def assign_neighbors():
+def assign_neighbors(n):
     ''' Generates the list of neighbors for each node.'''
     nodes = []
     for i in range(n):
         for j in range(n):
-            # nodes.append([])
-            nodes.append(calculate_neighbors(i, j))
+            nodes.append(calculate_neighbors(n, i, j))
     return nodes
 
 
@@ -107,30 +131,51 @@ def generate_symbol(nodes):
     return pattern
 
 
-def populate():
+def populate(window, screen_size, n, scale):
     ''' Fills the entire window with evenly-spaced symbols.'''
-    nodes = assign_neighbors()
+    nodes = assign_neighbors(n)
     for x in range(scale, screen_size-2*scale, n*scale):
         for y in range(scale, screen_size-2*scale, n*scale):
             sym = generate_symbol(nodes)
-            block_draw(sym, x, y)
+            # block_draw(window, sym, x, y, scale)
+            rainbow_block_draw(window, sym, x, y, scale)
 
 
-# create the screen
-num_sym = 700/((n-1)*scale)
-screen_size = scale + (n)*scale*num_sym + scale
-window = pygame.display.set_mode((screen_size, screen_size))
-pygame.display.get_surface().fill(bg_color)
+def symbol_window(num_symbol, n, scale):
+    '''Draws a grid of symbols given number of symbols and number of points (N).
+    '''
+    # create the screen
+    screen_size = scale + (n)*scale*num_symbol
+    window = pygame.display.set_mode((screen_size, screen_size))
+    bg_color = black
+    pygame.display.get_surface().fill(bg_color)
 
-populate()
+    populate(window, screen_size, n, scale)
 
-# draw all symbols at once
-pygame.display.flip()
+    # draw all symbols at once
+    pygame.display.flip()
 
-# keep window open
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit(0)
-        elif event.type == pygame.KEYDOWN:
-            pass
+
+if __name__ == '__main__':
+    # size of symbols (number of points square)
+    if len(sys.argv) > 2:
+        n = int(sys.argv[2])
+    else:
+        n = 3
+
+    scale = 10  # distance between nodes within symbol and between symbols
+
+    if len(sys.argv) > 1:
+        num_symbol = int(sys.argv[1])
+    else:
+        num_symbol = 700/((n-1)*scale)  # todo: default if no num_sym is provided
+
+    symbol_window(num_symbol, n, scale)
+
+    # keep window open
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                pass
