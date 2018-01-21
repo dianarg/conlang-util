@@ -33,6 +33,15 @@ Code 0,2,6 would make a shape like a 7.
 '''
 
 
+def num_to_symbol(width, num_str):
+    if width > 6:
+        raise ValueError('cannot handle integer base over 36')
+    symbol = []
+    for cc in num_str:
+        symbol.append(int(cc, width*width))
+    return symbol
+
+
 def point_list_to_segments(plist):
     lines = []
     first = plist.pop()
@@ -57,7 +66,7 @@ def color_list(num_seg):
     return colors
 
 
-def rainbow_block_draw(window, plist, x, y, scale):
+def rainbow_block_draw(window, plist, x, y, n, scale):
     segments = point_list_to_segments(plist)
     colors = color_list(len(segments))
     for ix, seg in enumerate(segments):
@@ -67,7 +76,7 @@ def rainbow_block_draw(window, plist, x, y, scale):
         pygame.draw.lines(window, colors[ix], False, [a, b], 2)
 
 
-def block_draw(window, plist, x, y, scale):
+def block_draw(window, plist, x, y, n, scale):
     ''' Draw a symbol by connecting the list of nodes in order.'''
     drawlist = []
     while len(plist) > 0:
@@ -141,8 +150,8 @@ def populate(window, screen_size, n, scale):
     for x in range(scale, screen_size-2*scale, n*scale):
         for y in range(scale, screen_size-2*scale, n*scale):
             sym = generate_symbol(nodes)
-            # block_draw(window, sym, x, y, scale)
-            rainbow_block_draw(window, sym, x, y, scale)
+            block_draw(window, sym, x, y, n, scale)
+            #rainbow_block_draw(window, sym, x, y, n, scale)
 
 
 def symbol_window(num_symbol, n, scale):
@@ -167,7 +176,7 @@ if __name__ == '__main__':
     else:
         n = 3
 
-    scale = 10  # distance between nodes within symbol and between symbols
+    scale = 15  # distance between nodes within symbol and between symbols
 
     if len(sys.argv) > 1:
         num_symbol = int(sys.argv[1])
