@@ -5,9 +5,9 @@ def check_point_list_to_segments(points, expected):
     assert point_list_to_segments(points) == expected
 
 
-def check_calculate_neighbors(n, x, y, expected):
-    assert n >= 2
-    assert calculate_neighbors(n, x, y) == expected
+def check_calculate_neighbors(width, x, y, expected):
+    assert width >= 2
+    assert calculate_neighbors(width, x, y) == expected
 
 
 def check_num_to_symbol(width, num_str, symbol):
@@ -34,31 +34,31 @@ def test_point_list_to_segments():
 
 
 def test_calculate_neighbors():
-    n = 2
+    width = 2
     '''
     0 1
     2 3
     '''
-    check_calculate_neighbors(n, 0, 0, [1, 2, 3])
-    check_calculate_neighbors(n, 0, 1, [0, 2, 3])
-    check_calculate_neighbors(n, 1, 0, [0, 1, 3])
-    check_calculate_neighbors(n, 1, 1, [0, 1, 2])
+    check_calculate_neighbors(width, 0, 0, [1, 2, 3])
+    check_calculate_neighbors(width, 0, 1, [0, 2, 3])
+    check_calculate_neighbors(width, 1, 0, [0, 1, 3])
+    check_calculate_neighbors(width, 1, 1, [0, 1, 2])
 
-    n = 3
+    width = 3
     '''
     0 1 2
     3 4 5
     6 7 8
     '''
-    check_calculate_neighbors(n, 0, 0, [1, 3, 4])
-    check_calculate_neighbors(n, 0, 1, [0, 2, 3, 4, 5])
-    check_calculate_neighbors(n, 0, 2, [1, 4, 5])
-    check_calculate_neighbors(n, 1, 0, [0, 1, 4, 6, 7])
-    check_calculate_neighbors(n, 1, 1, [0, 1, 2, 3, 5, 6, 7, 8])
-    check_calculate_neighbors(n, 1, 2, [1, 2, 4, 7, 8])
-    check_calculate_neighbors(n, 2, 0, [3, 4, 7])
-    check_calculate_neighbors(n, 2, 1, [3, 4, 5, 6, 8])
-    check_calculate_neighbors(n, 2, 2, [4, 5, 7])
+    check_calculate_neighbors(width, 0, 0, [1, 3, 4])
+    check_calculate_neighbors(width, 0, 1, [0, 2, 3, 4, 5])
+    check_calculate_neighbors(width, 0, 2, [1, 4, 5])
+    check_calculate_neighbors(width, 1, 0, [0, 1, 4, 6, 7])
+    check_calculate_neighbors(width, 1, 1, [0, 1, 2, 3, 5, 6, 7, 8])
+    check_calculate_neighbors(width, 1, 2, [1, 2, 4, 7, 8])
+    check_calculate_neighbors(width, 2, 0, [3, 4, 7])
+    check_calculate_neighbors(width, 2, 1, [3, 4, 5, 6, 8])
+    check_calculate_neighbors(width, 2, 2, [4, 5, 7])
 
 
 def test_num_to_symbol():
