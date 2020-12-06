@@ -73,7 +73,7 @@ class PixelGrid:
     def diamond_square(self):
         block = self.size
         size = self.size
-        d = size/4
+        d = int(size/4)
         self.points[0][0] = random.randint(0, 255)
         self.points[size-1][size-1] = random.randint(0, 255)
         self.points[0][size-1] = random.randint(0, 255)
