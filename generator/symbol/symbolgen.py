@@ -170,7 +170,7 @@ def symbol_window(num_symbol, width, scale, use_color):
     '''Draws a grid of symbols given number of symbols and number of points (N).
     '''
     # create the screen
-    screen_size = scale + (width)*scale*num_symbol
+    screen_size = int(scale + (width)*scale*num_symbol)
     window = pygame.display.set_mode((screen_size, screen_size))
     bg_color = (0, 0, 0)  # black
     pygame.display.get_surface().fill(bg_color)

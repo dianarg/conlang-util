@@ -83,4 +83,4 @@ if __name__ == '__main__':
     all_names = base + names + tribes + places
     gen_names = flavored_words.generate_words(all_names, 20)
     # gen_names = flavored_words.generate_words(names, 20)
-    print('\n'.join(gen_names))
+    print(('\n'.join(gen_names)))
