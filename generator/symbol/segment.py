@@ -75,12 +75,11 @@ def random_pixels(wpixels, hpixels):
         grid.append([])
         for y in range(hpixels):
             hue = random.uniform(0.0, 1.0)
-            sat = 1.0
-            val = 1.0
+            sat = random.uniform(0.3, 1.0)
+            val = random.uniform(0.3, 1.0)
             rgb = colorsys.hsv_to_rgb(hue, sat, val)
             rgb = (rgb[0]*255, rgb[1]*255, rgb[2]*255)
             grid[x].append(pygame.Color(rgb))
-
     return grid
 
 def block_draw(window, grid, links, wpixels, hpixels, scale):
