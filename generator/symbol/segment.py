@@ -4,6 +4,10 @@ import sys
 import random
 import argparse
 import colorsys
+import numpy as np
+import skimage
+import skimage.io
+import skimage.transform
 # import and init pygame
 import pygame
 pygame.init()
@@ -31,11 +35,14 @@ def distance(grid, x0, y0, x1, y1):
     dist = (abs(c0[0]-c1[0]) + abs(c0[1]-c1[1]) + abs(c0[2]-c1[2]))/3/255
     return dist
 
+
 def average(grid, x0, y0, x1, y1):
-    c0 = grid[x0][y0]
-    c1 = grid[x1][y1]
-    avg = c0.lerp(c1, 0.5)
-    return avg
+    #color = BLACK
+    c0 = pygame.Color(grid[x0][y0])
+    c1 = pygame.Color(grid[x1][y1])
+    color = c0.lerp(c1, 0.5)
+    color = pygame.Color([255 - color.r, 255 - color.g, 255 - color.b])
+    return color
 
 
 def find_links(grid):
@@ -55,26 +62,11 @@ def find_links(grid):
                 neighbors.append((x, y-1))
             if y < hpixels-1:
                 neighbors.append((x, y+1))
-            nearest = None
-            nearest_dist = 100
-            next_nearest = None
-            next_nearest_dist = 100
             thresh = 0.04
             for neigh in neighbors:
                 dist =  distance(grid, *(x,y), *neigh)
                 if dist < thresh:
                     links.append([(x, y), neigh])
-
-            #     if dist < thresh and dist < nearest_dist:
-            #         nearest = neigh
-            #         nearest_dist = dist
-            #     if dist < thresh and next_nearest != nearest and dist < next_nearest_dist:
-            #         next_nearest = neigh
-            #         next_nearest_dist = dist
-            # if nearest:
-            #     links.append([(x, y), nearest])
-            # if next_nearest:
-            #     links.append([(x,y), next_nearest])
     return links
 
 def random_pixels(wpixels, hpixels):
@@ -102,61 +94,45 @@ def block_draw(window, grid, links, wpixels, hpixels, scale):
                 pygame.draw.rect(window, grid[x][y], [x0, y0, x1, y1])
             except:
                 print(x, y, grid[x][y])
+
     pen_width = scale // 2
     for link in links:
         x0, y0 = link[0]
         x1, y1 = link[1]
         color = average(grid, x0, y0, x1, y1)
-        color = BLACK
         pygame.draw.line(window, color,
                          ((x0+0.5)*scale, (y0+0.5)*scale),
                          ((x1+0.5)*scale, (y1+0.5)*scale), width=pen_width)
 
 
 def load_image(image_path, wpixels, hpixels):
-    img = pygame.image.load(image_path)
-    img = pygame.transform.smoothscale(img, (wpixels, hpixels))
-    #img.convert()
-    img = pygame.surfarray.array2d(img)
-    pix = []
-    for ww in img:
-        pix.append([])
-        for hh in ww:
-            try:
-                res = pygame.Color('#{:06x}'.format(hh))
-            except:
-                print(hh, '#{:06x}'.format(hh))
-            pix[-1].append(res)
-    return pix
+
+    img = skimage.io.imread(args.image).astype(np.uint8)
+    # fix rotation
+    img = np.transpose(img, (1, 0, 2))
+
+    # apply scale to pixelize
+    img = skimage.transform.resize(img, (wpixels, hpixels))
+
+    # RGB for pygame
+    img *= 255
+
+    return img.tolist()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='symbol generator')
     parser.add_argument('--image', '-i', action='store', type=str, default=None)
-    # parser.add_argument('--width', action='store', type=int, default=3,
-    #                     help='width of symbols')
-    # parser.add_argument('--scale', action='store', type=int, default=10,
-    #                     help='space between points and padding around symbols, in pixels')
+    parser.add_argument('--scale', action='store', type=int, default=10,
+                        help='size of image pixels in screen pixels')
 
     args = parser.parse_args()
 
-    # scale = args.scale
-    # width = args.width
-    # colors = args.colors
     width = 800
     height = 800
-    scale = 40
+    scale = args.scale
     wpixels = width // scale
     hpixels = height // scale
-
-    if args.image:
-        grid = load_image(args.image, wpixels, hpixels)
-        # TODO: check size
-    else:
-        wpixels = width // scale
-        hpixels = height // scale
-        grid = random_pixels(wpixels, hpixels)
-
-    links = find_links(grid)
 
     # create the screen
     width = wpixels * scale
@@ -165,7 +141,18 @@ if __name__ == '__main__':
     bg_color = BLACK
     pygame.display.get_surface().fill(bg_color)
 
-    block_draw(window, grid, links, wpixels, hpixels, scale)
+    grid = None
+    if args.image:
+        grid = load_image(args.image, wpixels, hpixels)
+        # TODO: check size
+    else:
+        wpixels = width // scale
+        hpixels = height // scale
+        grid = random_pixels(wpixels, hpixels)
+
+    if grid is not None:
+        links = find_links(grid)
+        block_draw(window, grid, links, wpixels, hpixels, scale)
 
     # draw all symbols at once
     pygame.display.flip()
