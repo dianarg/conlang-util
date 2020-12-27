@@ -81,17 +81,18 @@ def rainbow_block_draw(window, plist, x, y, width, scale):
     colors = color_list(len(segments))
     for ix, seg in enumerate(segments):
         startp, endp = seg
-        a = (x+(startp % width)*scale, y+(startp/width)*scale)
-        b = (x+(endp % width)*scale, y+(endp/width)*scale)
+        a = (x+(startp % width)*scale, y+(startp//width)*scale)
+        b = (x+(endp % width)*scale, y+(endp//width)*scale)
         pygame.draw.lines(window, colors[ix], False, [a, b], 2)
 
 
-def block_draw(window, plist, x, y, width, scale):
+def block_draw(window, plist, x: int , y: int, width: int, scale: int):
     ''' Draw a symbol by connecting the list of nodes in order.'''
     drawlist = []
     while len(plist) > 0:
         point = plist.pop()
-        drawlist.append((x+(point % width)*scale, y+(point/width)*scale))
+        point = (int((x+(point % width)*scale)), int(y+(point // width)*scale))
+        drawlist.append(point)
 
     # add lines to be drawn when flip() is called
     line_color = (255, 255, 255)  # white
@@ -99,7 +100,7 @@ def block_draw(window, plist, x, y, width, scale):
 
 
 def calculate_neighbors(width, i, j):
-    k = i*width + j  # node number
+    k = i * width + j  # node number
     neighbors = []
     for u in [-1, 0, 1]:
         if (i+u) >= 0 and (i+u) < width:
@@ -154,7 +155,7 @@ def generate_symbol(nodes, width):
     return pattern
 
 
-def populate(window, screen_size, width, scale, use_color):
+def populate(window, screen_size: int, width: int, scale: int, use_color):
     ''' Fills the entire window with evenly-spaced symbols.'''
     nodes = assign_neighbors(width)
     for x in range(scale, screen_size-2*scale, width*scale):
@@ -201,7 +202,7 @@ if __name__ == '__main__':
     if args.num_symbol:
         num_symbol = args.num_symbol
     else:
-        num_symbol = 700/((width-1)*scale)  # default if no num_sym is provided
+        num_symbol = 700 // ((width - 1) * scale)  # default if no num_sym is provided
 
     symbol_window(num_symbol, width, scale, colors)
 
