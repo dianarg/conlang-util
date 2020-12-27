@@ -14,7 +14,7 @@ pygame.init()
     ./symbolgen.py
   Draw random symbols in 3x3 grid, use 4 points per side, scale 20, and showing
   stroke order with colors.
-    /symbolgen.py --width=4 --scale=20 --num_symbol=3 --colors
+    ./symbolgen.py --width=4 --scale=20 --num_symbol=3 --colors
 
 
 # Description
@@ -77,8 +77,22 @@ def color_list(num_seg):
 
 
 def rainbow_block_draw(window, plist, x, y, width, scale):
+    block_draw_segment(window, plist, x, y, width, scale, True)
+
+
+def block_draw_segment(window, plist, x, y, width, scale, use_color):
+    assert len(plist) > 0
+    if len(plist) == 1:
+        line_color = (255, 255, 255)
+        point = (x+(plist[0] % width)*scale, y+(plist[0]//width)*scale)
+        pygame.draw.circle(window, line_color, point, 2)
+        return
+
     segments = point_list_to_segments(plist)
-    colors = color_list(len(segments))
+    if use_color:
+        colors = color_list(len(segments))
+    else:
+        colors = [(255, 255, 255)] * len(segments)
     for ix, seg in enumerate(segments):
         startp, endp = seg
         a = (x+(startp % width)*scale, y+(startp//width)*scale)
@@ -96,7 +110,12 @@ def block_draw(window, plist, x: int , y: int, width: int, scale: int):
 
     # add lines to be drawn when flip() is called
     line_color = (255, 255, 255)  # white
-    pygame.draw.lines(window, line_color, False, drawlist, 2)
+    if len(drawlist) == 1:
+        pygame.draw.circle(window, line_color, drawlist[0], 2)
+    elif len(drawlist) > 1:
+        pygame.draw.lines(window, line_color, False, drawlist, 2)
+    else:
+        print("Drawlist was empty for {},{}".format(x, y))
 
 
 def calculate_neighbors(width, i, j):
@@ -121,46 +140,49 @@ def assign_neighbors(width):
     return nodes
 
 
-def build_pattern(start_neigh, nodes, pattern):
+def build_pattern(start_neigh, node_adj, nodelist, pattern):
     ''' Build a list of nodes to visit connected to the current node, until
         no more unvisited nodes are reachable.'''
-    num = 0
-    while len(start_neigh) > num:
-        if start_neigh[num] in pattern:
-            # skip if visited
-            num += 1
-        else:
-            pattern.append(start_neigh[num])
-            start_neigh = nodes[start_neigh[num]]
-            num = 0
 
-
-def generate_symbol(nodes, width):
+    curr_list = start_neigh.copy()
     # randomize the neighbor to be visited from each node
-    for nd in nodes:
-        random.shuffle(nd)
+    random.shuffle(curr_list)
+    while len(curr_list) > 0:
+        neigh = curr_list[-1]
+        del curr_list[-1]
+        if neigh in pattern or neigh not in nodelist:
+            # skip if visited or not in rectangle
+            pass
+        else:
+            pattern.append(neigh)
+            curr_list = node_adj[neigh].copy()
+            random.shuffle(curr_list)
+
+
+def generate_symbol(node_adj, nodelist):
+    ''' Uses a subset of the nodes to generate a smaller rectangular symbol. '''
 
     # randomize the starting point
     pattern = []
-    first = random.randint(0, width*width-1)
+    first = random.choice(nodelist)
     pattern.append(first)
 
-    build_pattern(nodes[first], nodes, pattern)
+    build_pattern(node_adj[first], node_adj, nodelist, pattern)
 
     # try to fill in emptiness by moving the original start node to the end of
     # the list, and continuing to add
     pattern.reverse()
-    build_pattern(nodes[pattern[-1]], nodes, pattern)
+    build_pattern(node_adj[pattern[-1]], node_adj, nodelist, pattern)
 
     return pattern
 
 
-def populate(window, screen_size: int, width: int, scale: int, use_color):
+def populate(node_adj, window, screen_size: int, width: int, scale: int, use_color):
     ''' Fills the entire window with evenly-spaced symbols.'''
-    nodes = assign_neighbors(width)
     for x in range(scale, screen_size-2*scale, width*scale):
         for y in range(scale, screen_size-2*scale, width*scale):
-            sym = generate_symbol(nodes, width)
+            nodelist = list(range(width*width))
+            sym = generate_symbol(node_adj, nodelist)
             if use_color:
                 rainbow_block_draw(window, sym, x, y, width, scale)
             else:
@@ -171,12 +193,13 @@ def symbol_window(num_symbol, width, scale, use_color):
     '''Draws a grid of symbols given number of symbols and number of points (N).
     '''
     # create the screen
-    screen_size = scale + (width)*scale*num_symbol
+    screen_size = (width * num_symbol + 1) * scale
     window = pygame.display.set_mode((screen_size, screen_size))
     bg_color = (0, 0, 0)  # black
     pygame.display.get_surface().fill(bg_color)
 
-    populate(window, screen_size, width, scale, use_color)
+    nodes = assign_neighbors(width)
+    populate(nodes, window, screen_size, width, scale, use_color)
 
     # draw all symbols at once
     pygame.display.flip()
@@ -190,8 +213,9 @@ if __name__ == '__main__':
                         help='width of symbols')
     parser.add_argument('--scale', action='store', type=int, default=10,
                         help='space between points and padding around symbols, in pixels')
-    parser.add_argument('--num_symbol', action='store', type=int, default=None,
-                        help='number of symbols to generate')
+    parser.add_argument('--num-symbol', action='store', type=int, default=None,
+                        dest='num_symbol',
+                        help='number of symbols to generate (square)')
 
     args = parser.parse_args()
 
