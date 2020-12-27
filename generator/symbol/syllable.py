@@ -89,6 +89,20 @@ def populate(node_adj, window, screen_size: int, width: int, scale: int, use_col
                         symbolgen.block_draw(window, sym, x, y, width, scale)
 
 
+def regen(window, num_symbol, width, scale, use_color):
+    bg_color = (0, 0, 0)  # black
+    pygame.display.get_surface().fill(bg_color)
+
+    # define node adjacency
+    node_adj = symbolgen.assign_neighbors(width)
+
+    # generate random symbols
+    populate(node_adj, window, screen_size, width, scale, use_color)
+
+    # draw all symbols at once
+    pygame.display.flip()
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='syllable generator')
     parser.add_argument('--colors', action='store_true', default=False,
@@ -110,17 +124,7 @@ if __name__ == '__main__':
     # create the screen
     screen_size = (width * num_symbol + 1) * scale
     window = pygame.display.set_mode((screen_size, screen_size))
-    bg_color = (0, 0, 0)  # black
-    pygame.display.get_surface().fill(bg_color)
-
-    # define node adjacency
-    node_adj = symbolgen.assign_neighbors(width)
-
-    # generate random symbols
-    populate(node_adj, window, screen_size, width, scale, use_color)
-
-    # draw all symbols at once
-    pygame.display.flip()
+    regen(window, num_symbol, width, scale, use_color)
 
     # keep window open
     while True:
@@ -128,4 +132,4 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN:
-                pass
+                regen(window, num_symbol, width, scale, use_color)

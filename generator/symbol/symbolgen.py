@@ -189,29 +189,24 @@ def populate(node_adj, window, screen_size: int, width: int, scale: int, use_col
                 block_draw(window, sym, x, y, width, scale)
 
 
-def symbol_window(num_symbol, width, scale, use_color):
-    '''Draws a grid of symbols given number of symbols and number of points (N).
-    '''
-    # create the screen
-    screen_size = (width * num_symbol + 1) * scale
-    window = pygame.display.set_mode((screen_size, screen_size))
+def regen(window, num_symbol, width, scale, use_color):
     bg_color = (0, 0, 0)  # black
     pygame.display.get_surface().fill(bg_color)
-
     nodes = assign_neighbors(width)
     populate(nodes, window, screen_size, width, scale, use_color)
-
     # draw all symbols at once
     pygame.display.flip()
 
 
 if __name__ == '__main__':
+    '''Draws a grid of symbols given number of symbols and number of points (N).
+    '''
     parser = argparse.ArgumentParser(description='symbol generator')
     parser.add_argument('--colors', action='store_true', default=False,
                         help='show stroke order using colors')
     parser.add_argument('--width', action='store', type=int, default=3,
                         help='width of symbols')
-    parser.add_argument('--scale', action='store', type=int, default=10,
+    parser.add_argument('--scale', action='store', type=int, default=20,
                         help='space between points and padding around symbols, in pixels')
     parser.add_argument('--num-symbol', action='store', type=int, default=None,
                         dest='num_symbol',
@@ -221,14 +216,17 @@ if __name__ == '__main__':
 
     scale = args.scale
     width = args.width
-    colors = args.colors
+    use_color = args.colors
 
     if args.num_symbol:
         num_symbol = args.num_symbol
     else:
         num_symbol = 700 // ((width - 1) * scale)  # default if no num_sym is provided
 
-    symbol_window(num_symbol, width, scale, colors)
+    # create the screen
+    screen_size = (width * num_symbol + 1) * scale
+    window = pygame.display.set_mode((screen_size, screen_size))
+    regen(window, num_symbol, width, scale, use_color)
 
     # keep window open
     while True:
@@ -236,4 +234,4 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN:
-                pass
+                regen(window, num_symbol, width, scale, use_color)
